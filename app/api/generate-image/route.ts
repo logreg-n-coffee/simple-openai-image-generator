@@ -19,16 +19,30 @@ const POST = async (req: NextRequest) => {
   }
 
   const prompt = reqBody.prompt;
+  let size = reqBody.size;
 
   if (!prompt) {
     return NextResponse.json({ error: "No prompt provided" }); // Bad Request
+  }
+
+  // Validation for size
+  if (!size) {
+    size = "256x256"; // Default size
+  } else {
+    const validSizes = ["256x256", "512x512", "1024x1024"];
+    if (!validSizes.includes(size)) {
+      return NextResponse.json({
+        error:
+          "Invalid size. It should be one of '256x256', '512x512', '1024x1024'.",
+      }); // Bad Request
+    }
   }
 
   try {
     const response = await openai.createImage({
       prompt,
       n: 1,
-      size: "256x256",
+      size,
     });
 
     return NextResponse.json({
